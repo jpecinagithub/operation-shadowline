@@ -199,14 +199,16 @@ const EMIT = {
         size0: rand(1.0, 1.6) * s, size1: 0.4 * s, opacity: 1,
       })
     }
-    // smoke
+    // smoke — soft billows, never hard black cards: fade in gently, modest
+    // opacity, lighter grays, capped growth (at close range a huge dark quad
+    // reads as a "black panel" instead of smoke)
     for (let i = 0; i < 8; i++) {
       spawnSprite(P, {
         pos: q.pos, maxLife: rand(2.8, 3.8), additive: false,
-        color: pick([0x4a4a52, 0x5c5c64, 0x3f3f46]),
+        color: pick([0x55555e, 0x62626a, 0x4c4c55]),
         vel: _mid.set(rand(-1.2, 1.2), rand(1.2, 2.8), rand(-1.2, 1.2)),
-        gravity: 1.2, drag: 1.1,
-        size0: rand(1.2, 1.8) * s, size1: rand(5, 6.5) * s, opacity: 0.5,
+        gravity: 1.2, drag: 1.1, fadeIn: 0.45,
+        size0: rand(1.2, 1.8) * s, size1: rand(3.8, 4.8) * s, opacity: 0.38,
       })
     }
     // sparks
@@ -308,8 +310,8 @@ const EMIT = {
         pos: q.pos, maxLife: d * rand(0.8, 1.1), additive: false,
         color: pick([0x6a6a70, 0x58585e, 0x76767c]),
         vel: _mid.set(rand(-0.8, 0.8), rand(1.0, 2.0), rand(-0.8, 0.8)),
-        gravity: 1.0, drag: 1.0,
-        size0: rand(1.0, 1.4) * s, size1: rand(3.5, 4.5) * s, opacity: 0.45,
+        gravity: 1.0, drag: 1.0, fadeIn: 0.6,
+        size0: rand(1.0, 1.4) * s, size1: rand(3.5, 4.5) * s, opacity: 0.38,
       })
     }
   },
