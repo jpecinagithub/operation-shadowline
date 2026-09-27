@@ -265,10 +265,12 @@ const EMIT = {
     for (let i = 0; i < 8; i++) {
       spawnSprite(P, {
         pos: q.pos, maxLife: rand(0.5, 0.7), additive: false,
-        color: pick([0x7a0d0d, 0x8f1414, 0x5e0909]),
+        // bright arterial red: must read as blood even in the night map
+        // (dark reds rendered as near-black quads and confused players)
+        color: pick([0xc21616, 0xd41e1e, 0xa81212]),
         vel: _mid.copy(q.dir).multiplyScalar(rand(2, 6)).add(_rndVec.set(rand(-2.5, 2.5), rand(0, 3), rand(-2.5, 2.5))),
         gravity: -12, drag: 1.2,
-        size0: rand(0.16, 0.24), size1: 0.1, opacity: 1,
+        size0: rand(0.2, 0.3), size1: 0.12, opacity: 1,
       })
     }
   },
