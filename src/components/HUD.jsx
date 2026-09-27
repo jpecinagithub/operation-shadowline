@@ -5,6 +5,8 @@ import { playerRef } from '../player/playerRef.js'
 import { interactables } from '../systems/interactables.js'
 import { audio } from '../systems/AudioManager.js'
 
+import Minimap from './Minimap.jsx'
+
 // Minimal military HUD. All pointer-events disabled — it is display only.
 export default function HUD() {
   const ammo = useGame((s) => s.ammo)
@@ -134,6 +136,9 @@ export default function HUD() {
 
       {/* low-hp pulse */}
       {lowHp && <div className="lowhp-vignette" />}
+
+      {/* tactical minimap — top right */}
+      <Minimap />
 
       {/* health — bottom left */}
       <div className="hud-hp">

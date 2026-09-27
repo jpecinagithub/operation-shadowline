@@ -1092,3 +1092,18 @@ body {
     width: min(340px, 92vw);
   }
 }
+
+/* ---------- tactical minimap ---------- */
+.minimap-wrap {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.7));
+}
+@media (max-width: 700px) {
+  .minimap-wrap {
+    transform: scale(0.75);
+    transform-origin: top right;
+  }
+}
