@@ -79,6 +79,12 @@ const MATS = {
   tankShell: lam(0x7a7d82),
   olive: lam(0x5b6242),
   oliveDark: lam(0x42482f),
+  // Allied uniform: blue-gray, deliberately unlike any enemy uniform color
+  // (enemies never wear blue). Cyan shoulder marker = instant friend read.
+  allyTop: lam(0x3f5063),
+  allyPants: lam(0x2b3542),
+  allyHelmet: lam(0x4a5d72),
+  allyMarker: lam(0x0a2a33, 0x35c8ff, 2.2),
   skin: lam(0x8a6a52),
   helmet: lam(0x3a3d33),
   cubicle: lam(0x39404a),
@@ -597,6 +603,9 @@ function RampShafts() {
 function Lobby() {
   return (
     <group>
+      {/* interior emergency lights (the tower is pitch black without them) */}
+      <pointLight color="#ffc98a" intensity={200} distance={26} decay={2} position={[-5, 3.2, -42]} />
+      <pointLight color="#ffc98a" intensity={200} distance={26} decay={2} position={[5, 3.2, -38]} />
       {/* reception desk (cover) */}
       <Solid p={[-5, 0.55, -42]} s={[4, 1.1, 1]} m={MATS.desk} />
       <P p={[-5, 1.15, -42]} s={[4.2, 0.08, 1.2]} m={MATS.towerTrim} cast={false} />
@@ -617,6 +626,9 @@ function Lobby() {
 function Floor2() {
   return (
     <group>
+      {/* interior emergency lights */}
+      <pointLight color="#ffc98a" intensity={200} distance={26} decay={2} position={[-4, 7, -42]} />
+      <pointLight color="#ffc98a" intensity={200} distance={26} decay={2} position={[4, 7, -39]} />
       {/* cubicle dividers (cover), y base = 4 */}
       <Solid p={[-3, 4.75, -40]} s={[6, 1.5, 0.15]} m={MATS.cubicle} />
       <Solid p={[3, 4.75, -40]} s={[6, 1.5, 0.15]} m={MATS.cubicle} />
@@ -639,11 +651,13 @@ function Floor2() {
 function FriendlySoldier({ p, ry = 0 }) {
   return (
     <group position={p} rotation={[0, ry, 0]} userData={{ baseY: p[1] }}>
-      <mesh geometry={GEO.box} material={MATS.oliveDark} scale={[0.42, 0.34, 0.4]} position={[0, 0.2, 0.1]} castShadow />
-      <mesh geometry={GEO.box} material={MATS.olive} scale={[0.44, 0.52, 0.3]} position={[0, 0.58, -0.02]} rotation={[0.15, 0, 0]} castShadow />
+      <mesh geometry={GEO.box} material={MATS.allyPants} scale={[0.42, 0.34, 0.4]} position={[0, 0.2, 0.1]} castShadow />
+      <mesh geometry={GEO.box} material={MATS.allyTop} scale={[0.44, 0.52, 0.3]} position={[0, 0.58, -0.02]} rotation={[0.15, 0, 0]} castShadow />
       <mesh geometry={GEO.sphere} material={MATS.skin} scale={[0.15, 0.17, 0.15]} position={[0, 0.95, 0.03]} />
-      <mesh geometry={GEO.box} material={MATS.helmet} scale={[0.26, 0.13, 0.28]} position={[0, 1.03, 0.03]} castShadow />
+      <mesh geometry={GEO.box} material={MATS.allyHelmet} scale={[0.26, 0.13, 0.28]} position={[0, 1.03, 0.03]} castShadow />
       <mesh geometry={GEO.box} material={MATS.darkMetal} scale={[0.07, 0.07, 0.95]} position={[0.18, 0.62, 0.32]} rotation={[0.1, 0, 0]} />
+      {/* cyan IFF marker on the shoulder: allies read as friendly even in the dark */}
+      <mesh geometry={GEO.box} material={MATS.allyMarker} scale={[0.09, 0.05, 0.09]} position={[-0.2, 0.82, 0]} />
     </group>
   )
 }
@@ -668,6 +682,9 @@ function AlliedTeam() {
 function Floor3() {
   return (
     <group>
+      {/* interior emergency lights */}
+      <pointLight color="#ffc98a" intensity={200} distance={26} decay={2} position={[-5, 11, -42]} />
+      <pointLight color="#ffc98a" intensity={200} distance={26} decay={2} position={[7, 11, -46]} />
       {/* office dividers west of the allied room */}
       <Solid p={[-6, 9, -38]} s={[8, 2, 0.3]} m={MATS.cubicle} />
       <Solid p={[-2, 9, -44]} s={[0.3, 2, 8]} m={MATS.cubicle} />

@@ -40,7 +40,9 @@ const GEO = {
   visor: new THREE.BoxGeometry(0.24, 0.05, 0.03),
 }
 
-const UNIFORMS = ['#5a6248', '#8a7a5c', '#6b6f72', '#4e5a52']
+const UNIFORMS = ['#6e6258', '#8a7a5c', '#6b6f72', '#41474d']
+// NOTE: no olive/green tones here — allies wear blue-gray, and these must never
+// read as friendly at a glance.
 
 const normPt = (p) => (Array.isArray(p) ? { x: p[0], z: p[1] } : { x: p.x, z: p.z })
 
