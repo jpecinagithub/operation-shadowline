@@ -69,6 +69,60 @@ function DesertDust() {
   )
 }
 
+// Phase B: arctic snowfall — points drifting down with wind, wrapping in a
+// 60m box around the camera. Urban rain lives inside the UrbanBlackout map.
+const SNOW = 400
+function ArcticSnow() {
+  const data = useMemo(() => {
+    const offsets = new Float32Array(SNOW * 3)
+    for (let i = 0; i < SNOW; i++) {
+      offsets[i * 3] = (Math.random() - 0.5) * BOX
+      offsets[i * 3 + 1] = Math.random() * MAX_H
+      offsets[i * 3 + 2] = (Math.random() - 0.5) * BOX
+    }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(offsets, 3))
+    return { offsets, geo }
+  }, [])
+
+  useFrame((state, rawDt) => {
+    const dt = rawDt > 0.05 ? 0.05 : rawDt
+    const cam = state.camera.position
+    const off = data.offsets
+    const pos = data.geo.attributes.position.array
+    const t = state.clock.elapsedTime
+    for (let i = 0; i < SNOW; i++) {
+      const i3 = i * 3
+      let x = off[i3] + (1.6 + Math.sin(t * 0.8 + i * 1.3) * 0.9) * dt
+      let y = off[i3 + 1] - (1.4 + (i % 5) * 0.35) * dt
+      let z = off[i3 + 2] + (0.7 + Math.cos(t * 0.6 + i) * 0.7) * dt
+      if (x > HALF) x -= BOX; else if (x < -HALF) x += BOX
+      if (z > HALF) z -= BOX; else if (z < -HALF) z += BOX
+      if (y < 0) y += MAX_H; else if (y > MAX_H) y -= MAX_H
+      off[i3] = x
+      off[i3 + 1] = y
+      off[i3 + 2] = z
+      pos[i3] = cam.x + x
+      pos[i3 + 1] = y
+      pos[i3 + 2] = cam.z + z
+    }
+    data.geo.attributes.position.needsUpdate = true
+  })
+
+  return (
+    <points geometry={data.geo} frustumCulled={false}>
+      <pointsMaterial
+        color="#dfe9f5"
+        size={0.12}
+        sizeAttenuation
+        transparent
+        opacity={0.55}
+        depthWrite={false}
+      />
+    </points>
+  )
+}
+
 // Phase B: arctic (snowfall) and urban (rain/ash) plug in here.
 export default function Weather() {
   const mission = useGame((s) => s.mission)
@@ -76,9 +130,9 @@ export default function Weather() {
     case 'desert':
       return <DesertDust />
     case 'arctic':
-      return null
+      return <ArcticSnow />
     case 'urban':
-      return null
+      return null // rain is rendered by the UrbanBlackout map itself
     default:
       return null
   }

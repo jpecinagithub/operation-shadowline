@@ -137,7 +137,7 @@ export default function MainMenu() {
           <br />
           SHADOWLINE
         </h1>
-        <div className="game-subtitle">Desert Strike — Phase A</div>
+        <div className="game-subtitle">Three operations. One shadow.</div>
         <nav className="menu-buttons">
           <button
             className="menu-btn primary"

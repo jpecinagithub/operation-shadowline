@@ -9,6 +9,8 @@ import EnemyManager from '../enemies/EnemyManager.jsx'
 import EffectsRenderer from '../effects/Effects.jsx'
 import Weather from '../effects/Weather.jsx'
 import DesertStrike from '../maps/DesertStrike.jsx'
+import ArcticOutpost from '../maps/ArcticOutpost.jsx'
+import UrbanBlackout from '../maps/UrbanBlackout.jsx'
 import MissionManager, { checkpointApi } from '../missions/MissionManager.jsx'
 import { useGame } from '../systems/GameState.js'
 import { MISSIONS } from '../missions/missionData.js'
@@ -116,7 +118,8 @@ export default function Game() {
           <EffectsRenderer />
           <Weather />
           {mission === 'desert' && <DesertStrike key={`map-${runId}`} />}
-          {/* arctic / urban maps are Phase B — render nothing for them yet */}
+          {mission === 'arctic' && <ArcticOutpost key={`map-${runId}`} />}
+          {mission === 'urban' && <UrbanBlackout key={`map-${runId}`} />}
           <MissionManager key={`mission-${runId}`} />
         </Physics>
       </Canvas>

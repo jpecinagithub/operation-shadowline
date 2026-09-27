@@ -15,6 +15,23 @@ npm run dev      # dev server
 npm run build    # production build
 ```
 
+## Missions
+
+Three fully playable scenarios, all sharing the same core systems (FPS controller,
+weapons, enemy AI, grenades, HUD, procedural audio, checkpoints):
+
+- **DESERT STRIKE** (Medium) — fight through a desert town at sunset and destroy the
+  enemy communications post. 9 objectives, rooftop enemies, gun truck, planted
+  explosive with 12s countdown, car-ambush + relay-detonation cinematics.
+- **ARCTIC OUTPOST** (Hard) — infiltrate a secret mountain base at night and steal
+  military intel. 8 objectives: stealth approach, perimeter guards, hangar combat,
+  data-center download, then a base-wide **alarm turns every light red** while you
+  escape through a fuel-depot explosion and reinforcement waves.
+- **URBAN BLACKOUT** (Hard) — rescue a trapped allied team in a rain-soaked ruined
+  city at night. 8 objectives: avenue firefight (fuel-truck ambush), 3-floor office
+  tower climb, allied-team rescue, a **90-second hold** against reinforcement waves,
+  and helicopter evacuation.
+
 ## Controls
 
 | Key           | Action              |
@@ -43,7 +60,7 @@ src/
   components/
     Game.jsx                # 3D session: Canvas + Physics + HUD + overlays + restart wiring
     MainMenu.jsx            # title screen + animated dust/silhouette backdrop
-    MissionSelect.jsx       # mission cards (Desert Strike playable, others in dev)
+    MissionSelect.jsx       # mission cards (all three missions playable)
     Controls.jsx            # control table
     Settings.jsx            # sensitivity / volume / quality
     HUD.jsx                 # ammo, hp, crosshair, objective, hitmarker, prompts
@@ -56,9 +73,11 @@ src/
     damageables.js          # destructible objects registry
   missions/
     missionData.js          # DESERT STRIKE / ARCTIC OUTPOST / URBAN BLACKOUT defs
-    MissionManager.jsx      # objectives, checkpoints, spawn/checkpoint API (MAP agent)
+    MissionManager.jsx      # objectives, checkpoints, spawn/checkpoint API (all missions)
   maps/
-    DesertStrike.jsx        # ~120x140m desert town map (MAP agent)
+    DesertStrike.jsx        # desert town at sunset
+    ArcticOutpost.jsx       # night snow base with alarm red-light cinematic
+    UrbanBlackout.jsx       # rainy ruined city + 3-floor tower + helicopter evac
   player/
     playerRef.js            # mutable per-frame player state (no zustand churn)
     PlayerController.jsx    # movement, look, pointer lock, pause on Esc (PLAYER agent)
