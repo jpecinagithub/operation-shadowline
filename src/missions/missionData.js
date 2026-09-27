@@ -10,6 +10,7 @@ export const MISSIONS = {
     weapons: ['AR7', 'KX9'],
     spawn: [0, 0.2, 46],
     spawnYaw: Math.PI, // facing -z into town
+    ammoCrates: [[3, 0, 42], [-8, 0, 10], [7, 0, -50]],
     objectives: [
       { id: 'enter', title: 'Enter the town', desc: 'Advance through the south gate', target: [0, 32] },
       { id: 'patrol', title: 'Eliminate the patrol', desc: 'Clear hostiles near the entrance', target: 'enemies' },
@@ -31,6 +32,7 @@ export const MISSIONS = {
     weapons: ['AR7', 'VX'],
     spawn: [0, 0.2, 60],
     spawnYaw: Math.PI,
+    ammoCrates: [[3, 0, 54], [-12, 0, -18], [8, 0, -36]],
     objectives: [
       { id: 'approach', title: 'Approach undetected', desc: 'Reach the outer fence', target: [0, 34] },
       { id: 'guards', title: 'Eliminate outer guards', desc: 'Silence the perimeter patrol', target: 'enemies' },
@@ -51,6 +53,7 @@ export const MISSIONS = {
     weapons: ['AR7', 'M12'],
     spawn: [0, 0.2, 55],
     spawnYaw: Math.PI,
+    ammoCrates: [[-3, 0, 52], [2.5, 0, -30], [10, 8.2, -44]],
     objectives: [
       { id: 'avenue', title: 'Advance up the avenue', desc: 'Push north through the wrecks', target: [0, 24] },
       { id: 'street', title: 'Clear the street', desc: 'Fight between the vehicles', target: 'enemies' },

@@ -104,6 +104,14 @@ class AudioManager {
   }
 
   dryFire() { this._tone(1400, 0.04, { type: 'square', gain: 0.1 }) }
+  pickup() {
+    this._tone(660, 0.07, { type: 'square', gain: 0.16 })
+    this._tone(990, 0.09, { type: 'square', gain: 0.16, at: 0.07 })
+  }
+  resupply() {
+    this._tone(220, 0.12, { type: 'square', gain: 0.22, slideTo: 440 })
+    this._tone(440, 0.12, { type: 'square', gain: 0.18, at: 0.1, slideTo: 660 })
+  }
 
   explosion(big = 1) {
     this._noise(1.2 * big, { freq: 300, type: 'lowpass', gain: 1.0, decay: 0.8 })

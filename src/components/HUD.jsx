@@ -3,6 +3,7 @@ import { useGame } from '../systems/GameState.js'
 import { WEAPONS } from '../weapons/weaponData.js'
 import { playerRef } from '../player/playerRef.js'
 import { interactables } from '../systems/interactables.js'
+import { getLastPickupLabel } from '../systems/pickups.js'
 import { audio } from '../systems/AudioManager.js'
 
 import Minimap from './Minimap.jsx'
@@ -18,6 +19,7 @@ export default function HUD() {
   const reloading = useGame((s) => s.reloading)
   const evHit = useGame((s) => s.ev.hit)
   const evHurt = useGame((s) => s.ev.hurt)
+  const evPickup = useGame((s) => s.ev.pickup)
   const objectives = useGame((s) => s.objectives)
   const objectiveIndex = useGame((s) => s.objectiveIndex)
   const status = useGame((s) => s.status)
@@ -39,6 +41,18 @@ export default function HUD() {
       return () => clearTimeout(t)
     }
   }, [evHit])
+
+  // --- pickup toast: brief label on ev.pickup change ---
+  const [pickupToast, setPickupToast] = useState(null)
+  const lastPickupEv = useRef(evPickup)
+  useEffect(() => {
+    if (evPickup !== lastPickupEv.current) {
+      lastPickupEv.current = evPickup
+      setPickupToast({ label: getLastPickupLabel(), key: Date.now() })
+      const t = setTimeout(() => setPickupToast(null), 1400)
+      return () => clearTimeout(t)
+    }
+  }, [evPickup])
 
   // --- damage vignette: re-trigger fade on ev.hurt change ---
   const [dmgKey, setDmgKey] = useState(0)
@@ -128,6 +142,13 @@ export default function HUD() {
         <div className="hitmarker">
           <span className="hm a" />
           <span className="hm b" />
+        </div>
+      )}
+
+      {/* pickup toast */}
+      {pickupToast && (
+        <div className="pickup-toast" key={pickupToast.key}>
+          {pickupToast.label}
         </div>
       )}
 

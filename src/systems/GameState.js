@@ -66,7 +66,7 @@ export const useGame = create((set, get) => ({
   missionTime: 0,
 
   // ---- events: incrementing counters, consumed via subscribe ----
-  ev: { shoot: 0, hit: 0, kill: 0, hurt: 0, reload: 0, explosion: 0, objective: 0, interact: 0, checkpoint: 0 },
+  ev: { shoot: 0, hit: 0, kill: 0, hurt: 0, reload: 0, explosion: 0, objective: 0, interact: 0, checkpoint: 0, pickup: 0 },
   emit: (name) => set((s) => ({ ev: { ...s.ev, [name]: (s.ev[name] || 0) + 1 } })),
 
   // ---- banner (OBJECTIVE COMPLETE etc): {title, sub} | null ----
@@ -96,7 +96,7 @@ export const useGame = create((set, get) => ({
       objectives: missionDef.objectives, objectiveIndex: 0,
       kills: 0, missionTime: 0,
       banner: null, lastScore: null,
-      ev: { shoot: 0, hit: 0, kill: 0, hurt: 0, reload: 0, explosion: 0, objective: 0, interact: 0, checkpoint: 0 },
+      ev: { shoot: 0, hit: 0, kill: 0, hurt: 0, reload: 0, explosion: 0, objective: 0, interact: 0, checkpoint: 0, pickup: 0 },
     })
   },
 
@@ -153,6 +153,28 @@ export const useGame = create((set, get) => ({
   },
 
   addKill: () => set((s) => ({ kills: s.kills + 1 })),
+
+  // Add reserve ammo for a weapon, capped at maxReserve. Returns amount added.
+  addReserveAmmo: (weaponId, amount) => {
+    const s = get()
+    const w = WEAPONS[weaponId]
+    const a = s.ammo[weaponId]
+    if (!w || !a || amount <= 0) return 0
+    const add = Math.min(amount, Math.max(0, w.maxReserve - a.reserve))
+    if (add > 0) set({ ammo: { ...s.ammo, [weaponId]: { ...a, reserve: a.reserve + add } } })
+    return add
+  },
+
+  // Resupply crates: refill every carried weapon's reserve + grenades.
+  resupplyAll: () => {
+    const s = get()
+    const ammo = { ...s.ammo }
+    for (const id of s.weapons) {
+      const w = WEAPONS[id]
+      if (w && ammo[id]) ammo[id] = { ...ammo[id], reserve: w.maxReserve }
+    }
+    set({ ammo, grenades: 2 })
+  },
 
   completeObjective: () => {
     const s = get()

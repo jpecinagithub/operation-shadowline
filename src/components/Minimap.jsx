@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 import { playerRef } from '../player/playerRef.js'
 import { useGame } from '../systems/GameState.js'
 import { enemyRegistry } from '../enemies/enemyRegistry.js'
+import { pickups } from '../systems/pickups.js'
 import { MAP_BOUNDS, objectiveWorldPos } from '../systems/radar.js'
 
 const SIZE = 190
@@ -25,6 +26,7 @@ export default function Minimap() {
     const trail = []
     let lastTrailT = 0
     let enemies = []
+    let drops = []
     let lastEnemyT = 0
     let lastMission = null
     let raf = 0
@@ -37,6 +39,7 @@ export default function Minimap() {
         lastMission = g.mission
         trail.length = 0
         enemies = []
+        drops = []
       }
       const bounds = MAP_BOUNDS[g.mission] || MAP_BOUNDS.desert
       const px = playerRef.position.x
@@ -58,6 +61,7 @@ export default function Minimap() {
           const p = e.getPosition()
           return { x: p.x, z: p.z }
         })
+        drops = pickups.list.filter((p) => p.kind === 'ammo').map((p) => ({ x: p.pos[0], z: p.pos[2] }))
       }
 
       ctx.clearRect(0, 0, SIZE, SIZE)
@@ -105,6 +109,12 @@ export default function Minimap() {
         ctx.fillRect(-4.5, -4.5, 9, 9)
         ctx.restore()
         dist = Math.round(Math.hypot(op.x - px, op.z - pz))
+      }
+
+      // ammo drops (green squares)
+      ctx.fillStyle = '#8fd14f'
+      for (const d of drops) {
+        ctx.fillRect(W(d.x) - 2.5, H(d.z) - 2.5, 5, 5)
       }
 
       // enemies

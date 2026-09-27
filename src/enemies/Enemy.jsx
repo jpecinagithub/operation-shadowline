@@ -10,6 +10,7 @@ import { playerRef } from '../player/playerRef.js'
 import { useGame } from '../systems/GameState.js'
 import { audio } from '../systems/AudioManager.js'
 import { fx } from '../effects/fx.js'
+import { spawnAmmoDrop } from '../systems/pickups.js'
 import { yawTo, lerpAngle, hasLOS, pickCover } from './ai.js'
 
 // ---------- module temps: zero allocation in the hot loop ----------
@@ -169,6 +170,10 @@ export default function Enemy({ spawn, covers }) {
     a.fadeT = 0
     a.deadY = group.current ? group.current.position.y : cfg.pos.y
     a.fallSide = Math.random() < 0.5 ? 1 : -1
+    if (group.current) {
+      const gp = group.current.position
+      spawnAmmoDrop(gp.x, gp.y + 0.4, gp.z)
+    }
     useGame.getState().addKill()
     useGame.getState().emit('kill')
     audio.impact('flesh')

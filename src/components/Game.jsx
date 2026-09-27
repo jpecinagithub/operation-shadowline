@@ -18,9 +18,12 @@ import { playerRef } from '../player/playerRef.js'
 import { enemyRegistry } from '../enemies/enemyRegistry.js'
 import { damageables } from '../systems/damageables.js'
 import { interactables } from '../systems/interactables.js'
+import { pickups } from '../systems/pickups.js'
 import { fx } from '../effects/fx.js'
 import { audio } from '../systems/AudioManager.js'
 import HUD from './HUD.jsx'
+import PickupManager from './PickupManager.jsx'
+import AmmoCrates from './AmmoCrates.jsx'
 import PauseMenu from './PauseMenu.jsx'
 import EndScreens from './EndScreens.jsx'
 
@@ -97,6 +100,9 @@ export default function Game() {
         interactables.clear()
       } catch {}
       try {
+        pickups.clear()
+      } catch {}
+      try {
         fx.clear()
       } catch {}
       try {
@@ -121,6 +127,8 @@ export default function Game() {
           {mission === 'arctic' && <ArcticOutpost key={`map-${runId}`} />}
           {mission === 'urban' && <UrbanBlackout key={`map-${runId}`} />}
           <MissionManager key={`mission-${runId}`} />
+          <PickupManager />
+          <AmmoCrates key={`crates-${runId}`} />
         </Physics>
       </Canvas>
       <HUD />

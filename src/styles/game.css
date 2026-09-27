@@ -1107,3 +1107,23 @@ body {
     transform-origin: top right;
   }
 }
+
+/* ---------- pickup toast ---------- */
+.pickup-toast {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translateX(-50%);
+  color: #8fd14f;
+  font-size: 17px;
+  letter-spacing: 0.22em;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+  animation: toastUp 1.4s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes toastUp {
+  0% { opacity: 0; transform: translate(-50%, 8px); }
+  15% { opacity: 1; transform: translate(-50%, 0); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -14px); }
+}
