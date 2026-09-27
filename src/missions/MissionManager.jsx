@@ -15,6 +15,7 @@ import { interactables } from '../systems/interactables.js'
 import { fx } from '../effects/fx.js'
 import { audio } from '../systems/AudioManager.js'
 import { MISSIONS } from './missionData.js'
+import { enemiesInZone } from '../systems/radar.js'
 import { mapRefs } from '../maps/DesertStrike.jsx'
 import { arcticMapRefs } from '../maps/ArcticOutpost.jsx'
 import { urbanMapRefs } from '../maps/UrbanBlackout.jsx'
@@ -71,6 +72,12 @@ const IDX = { enter: 0, patrol: 1, market: 2, roofs: 3, plaza: 4, vehicle: 5, co
 const AIDX = { approach: 0, guards: 1, enter: 2, hangar: 3, data: 4, download: 5, alarm: 6, exfil: 7 }
 // urban.objectives: avenue, street, enter, climb, offices, rescue, defend, evac
 const UIDX = { avenue: 0, street: 1, enter: 2, climb: 3, offices: 4, rescue: 5, defend: 6, evac: 7 }
+
+// Zone of the currently active objective (missionData), for zone-based "clear" objectives.
+const currentObjectiveZone = (g) => {
+  const o = g.objectives && g.objectives[g.objectiveIndex]
+  return (o && o.zone) || null
+}
 const DEFEND_TIME = 90 // seconds to hold during urban 'defend'
 
 export default function MissionManager() {
@@ -135,11 +142,9 @@ export default function MissionManager() {
         enemyRegistry.requestSpawn({ pos: [8, 0.6, 34], patrol: [[8, 32], [8, 38]] })
       }
     } else if (m === 'urban') {
-      if (idx === UIDX.street) {
-        needKills.current = Math.max(1, Math.min(3, enemyRegistry.aliveCount()))
-      } else if (idx === UIDX.offices) {
-        needKills.current = Math.max(1, Math.min(4, enemyRegistry.aliveCount()))
-      } else if (idx === UIDX.defend) {
+      // street/offices are zone-based (see tickUrban): no kill snapshot needed,
+      // so they can never soft-lock if the area was cleared early.
+      if (idx === UIDX.defend) {
         urb.current.def = { t: 0, wave: 0, b60: false, b30: false, b10: false }
         useGame.getState().showBanner('DEFEND THE POSITION', 'Hold 90 seconds', 3500)
       } else if (idx === UIDX.evac) {
@@ -310,7 +315,8 @@ export default function MissionManager() {
           if (urbanMapRefs.fuelId) damageables.damage(urbanMapRefs.fuelId, 999)
           useGame.getState().showBanner('AMBUSH', 'Fuel truck detonated', 3200)
         }
-        if (g.kills - killsAtStart.current >= needKills.current) completeObjectiveFlow()
+        // zone-based: clear while any hostile remains in the street band
+        if (enemiesInZone(currentObjectiveZone(g)).length === 0) completeObjectiveFlow()
         break
       case UIDX.enter: // 2: breach the tower lobby
         if (Math.abs(p.x) < 4 && p.z < -28 && p.z > -36) completeObjectiveFlow()
@@ -323,8 +329,8 @@ export default function MissionManager() {
           completeObjectiveFlow()
         }
         break
-      case UIDX.offices: // 4: clear floor hostiles
-        if (g.kills - killsAtStart.current >= needKills.current) completeObjectiveFlow()
+      case UIDX.offices: // 4: clear floor hostiles (zone-based, never soft-locks)
+        if (enemiesInZone(currentObjectiveZone(g)).length === 0) completeObjectiveFlow()
         break
       case UIDX.rescue: // 5: reach the allied-team room
         if (p.y > 7.5 && p.x > 4 && p.x < 12 && p.z < -42 && p.z > -50) completeObjectiveFlow()

@@ -54,39 +54,51 @@ export const pickups = {
 
 const DROP_CHANCE = 0.7
 
-// Called from Enemy.onDeath. Drops one magazine of reserve ammo for a random
-// carried weapon at the casualty's position.
+// Called from Enemy.onDeath. Drops a generic ammo box at the casualty's position.
+// The box is weapon-agnostic: at pickup time it fills the carried weapon that
+// needs it most (lowest reserve ratio, current weapon wins ties).
 export function spawnAmmoDrop(x, y, z) {
   try {
     if (Math.random() > DROP_CHANCE) return null
-    const g = useGame.getState()
-    const carried = (g.weapons || []).filter((id) => WEAPONS[id])
-    if (!carried.length) return null
-    const wid = carried[Math.floor(Math.random() * carried.length)]
-    return pickups.spawn({
-      kind: 'ammo',
-      pos: [x, y, z],
-      weaponId: wid,
-      amount: WEAPONS[wid].magSize,
-    })
+    return pickups.spawn({ kind: 'ammo', pos: [x, y, z] })
   } catch {
     return null
   }
 }
 
-// Returns true if the pickup was consumed.
+// Returns 'ok' | 'full' (all reserves maxed — leave the box) | 'error'.
 export function collectPickup(p) {
   try {
     const g = useGame.getState()
     if (p.kind === 'ammo') {
-      const added = g.addReserveAmmo(p.weaponId, p.amount)
-      if (added <= 0) return false // reserve full — leave it on the ground
-      setLastPickupLabel(`+${added} ${p.weaponId} AMMO`)
+      const carried = (g.weapons || []).filter((id) => WEAPONS[id] && g.ammo[id])
+      let best = null
+      let bestRatio = Infinity
+      for (const id of carried) {
+        const ratio = g.ammo[id].reserve / WEAPONS[id].maxReserve
+        if (ratio < bestRatio) {
+          best = id
+          bestRatio = ratio
+        }
+      }
+      // prefer the weapon in hand on ties
+      const cur = g.currentWeapon
+      if (cur && g.ammo[cur] && WEAPONS[cur]) {
+        const curRatio = g.ammo[cur].reserve / WEAPONS[cur].maxReserve
+        if (curRatio <= bestRatio + 1e-6) {
+          best = cur
+          bestRatio = curRatio
+        }
+      }
+      if (!best || bestRatio >= 1 - 1e-6) return 'full'
+      const added = g.addReserveAmmo(best, WEAPONS[best].magSize)
+      if (added <= 0) return 'full'
+      setLastPickupLabel(`+${added} ${best} AMMO`)
     }
     pickups.remove(p.id)
     g.emit('pickup')
-    return true
+    return 'ok'
   } catch {
-    return false
+    return 'error'
   }
 }

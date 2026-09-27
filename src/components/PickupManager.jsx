@@ -2,11 +2,13 @@
 // + expiry. Mounted once inside the Canvas in Game.jsx.
 import { useRef, useSyncExternalStore } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { pickups, collectPickup } from '../systems/pickups.js'
+import { pickups, collectPickup, setLastPickupLabel } from '../systems/pickups.js'
 import { playerRef } from '../player/playerRef.js'
+import { useGame } from '../systems/GameState.js'
 import { audio } from '../systems/AudioManager.js'
 
 const COLLECT_R2 = 2.6 // squared XZ distance
+const FULL_HINT_MS = 4000
 
 function DropMesh({ p }) {
   const ref = useRef()
@@ -40,6 +42,7 @@ function DropMesh({ p }) {
 export default function PickupManager() {
   useSyncExternalStore(pickups.subscribe, pickups.getVersion)
   const list = pickups.list
+  const lastFullHint = useRef(0)
 
   useFrame(() => {
     const pp = playerRef.position
@@ -53,9 +56,17 @@ export default function PickupManager() {
       const dx = p.pos[0] - pp.x
       const dz = p.pos[2] - pp.z
       if (dx * dx + dz * dz < COLLECT_R2 && Math.abs(p.pos[1] - pp.y) < 2.5) {
-        if (collectPickup(p)) {
+        const res = collectPickup(p)
+        if (res === 'ok') {
           try {
             audio.pickup()
+          } catch {}
+        } else if (res === 'full' && now - lastFullHint.current > FULL_HINT_MS) {
+          // tell the player why the box won't go away (throttled)
+          lastFullHint.current = now
+          setLastPickupLabel('AMMO FULL')
+          try {
+            useGame.getState().emit('pickup')
           } catch {}
         }
       }
