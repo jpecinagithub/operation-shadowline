@@ -4,6 +4,7 @@ import { create } from 'zustand'
 import { WEAPONS } from '../weapons/weaponData.js'
 import { MISSIONS } from '../missions/missionData.js'
 import { playerRef } from '../player/playerRef.js'
+import { computeScore, saveScore, getPlayerName, setPlayerName as persistName } from './scores.js'
 
 const freshAmmo = () => {
   const a = {}
@@ -20,6 +21,30 @@ export const useGame = create((set, get) => ({
   // ---- settings ----
   settings: { sensitivity: 1.0, volume: 0.8, quality: 'high' },
   setSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
+
+  // ---- operator identity + score registry ----
+  playerName: getPlayerName(),
+  nameModal: null, // null | { missionId } | { rename: true }
+  lastScore: null, // { score, rank, isRecord, kills, time } of the last completed mission
+
+  setPlayerName: (name) => {
+    const clean = (name || '').trim().slice(0, 12) || 'OPERATOR'
+    persistName(clean)
+    set({ playerName: clean })
+  },
+  // Deploy flow: ask for callsign first if we don't have one yet.
+  requestDeploy: (missionId) => {
+    if (!get().playerName) set({ nameModal: { missionId } })
+    else get().startMission(missionId, MISSIONS[missionId])
+  },
+  submitName: (name) => {
+    get().setPlayerName(name)
+    const m = get().nameModal
+    set({ nameModal: null })
+    if (m && m.missionId) get().startMission(m.missionId, MISSIONS[m.missionId])
+  },
+  cancelNameModal: () => set({ nameModal: null }),
+  openRename: () => set({ nameModal: { rename: true } }),
 
   // ---- player ----
   hp: 100,
@@ -70,7 +95,7 @@ export const useGame = create((set, get) => ({
       ads: false, sprint: false, crouch: false, reloading: false,
       objectives: missionDef.objectives, objectiveIndex: 0,
       kills: 0, missionTime: 0,
-      banner: null,
+      banner: null, lastScore: null,
       ev: { shoot: 0, hit: 0, kill: 0, hurt: 0, reload: 0, explosion: 0, objective: 0, interact: 0, checkpoint: 0 },
     })
   },
@@ -139,6 +164,27 @@ export const useGame = create((set, get) => ({
     s.emit('objective')
     if (next >= s.objectives.length) {
       s.showBanner('MISSION COMPLETE', done.title, 4000)
+      // Record the score once (completeObjective can't fire twice for the same
+      // run: objectiveIndex stays at objectives.length afterwards).
+      try {
+        const st = get()
+        const score = computeScore({
+          kills: st.kills,
+          objectives: st.objectives.length,
+          missionTime: st.missionTime,
+          mission: st.mission,
+        })
+        const res = saveScore(st.mission, {
+          name: st.playerName || 'OPERATOR',
+          score,
+          kills: st.kills,
+          time: Math.round(st.missionTime),
+          date: Date.now(),
+        })
+        set({ lastScore: { score, kills: st.kills, time: st.missionTime, rank: res.rank, isRecord: res.isRecord } })
+      } catch {
+        /* score registry optional */
+      }
       setTimeout(() => set({ status: 'complete' }), 2500)
     } else {
       s.showBanner('OBJECTIVE COMPLETE', done.title)

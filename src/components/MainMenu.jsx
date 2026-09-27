@@ -1,8 +1,64 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useGame } from '../systems/GameState.js'
 import { MISSIONS } from '../missions/missionData.js'
+import { loadScores } from '../systems/scores.js'
 import { audio } from '../systems/AudioManager.js'
+
+function fmtTime(sec) {
+  const s = Math.max(0, Math.floor(sec || 0))
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+}
+
+const RANK_STYLE = ['#ffd75e', '#c9d2dd', '#d08a4e']
+const SHORT = { desert: 'DESERT', arctic: 'ARCTIC', urban: 'URBAN' }
+
+// Leaderboard: top-10 per mission, read from the local score registry.
+function Leaderboard() {
+  const [tab, setTab] = useState('desert')
+  const [scores] = useState(() => loadScores())
+  const playerName = useGame((s) => s.playerName)
+  const openRename = useGame((s) => s.openRename)
+  const top = (scores[tab] || []).slice(0, 10)
+
+  return (
+    <div className="lb-panel">
+      <div className="lb-operator">
+        <span className="lb-op-label">OPERATOR</span>
+        <span className="lb-op-name">{playerName || '—'}</span>
+        <button className="lb-op-edit" onClick={() => { try { audio.uiClick() } catch {}; openRename() }}>
+          {playerName ? 'CHANGE' : 'SET'}
+        </button>
+      </div>
+      <div className="panel-kicker">LEADERBOARD</div>
+      <div className="lb-tabs">
+        {Object.values(MISSIONS).map((m) => (
+          <button
+            key={m.id}
+            className={`lb-tab ${tab === m.id ? 'active' : ''}`}
+            onClick={() => { try { audio.uiClick() } catch {}; setTab(m.id) }}
+          >
+            {SHORT[m.id] || m.name}
+          </button>
+        ))}
+      </div>
+      <div className="lb-rows">
+        {top.length === 0 && <div className="lb-empty">No recorded runs yet. Deploy, operator.</div>}
+        {top.map((e, i) => (
+          <div key={i} className={`lb-row ${e.name === playerName ? 'me' : ''}`}>
+            <span className="lb-rank" style={RANK_STYLE[i] ? { color: RANK_STYLE[i] } : undefined}>
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span className="lb-name">{e.name}</span>
+            <span className="lb-sub">{e.kills} K · {fmtTime(e.time)}</span>
+            <span className="lb-score">{e.score.toLocaleString('en-US')}</span>
+          </div>
+        ))}
+      </div>
+      <div className="lb-foot">Local registry — top 10 per operation</div>
+    </div>
+  )
+}
 
 // Cheap animated backdrop: drifting dust points + dark building silhouettes.
 function DustField({ count = 70 }) {
@@ -116,7 +172,7 @@ function MenuBackground() {
 }
 
 export default function MainMenu() {
-  const startMission = useGame((s) => s.startMission)
+  const requestDeploy = useGame((s) => s.requestDeploy)
   const setScreen = useGame((s) => s.setScreen)
 
   const click = (fn) => () => {
@@ -130,36 +186,36 @@ export default function MainMenu() {
   return (
     <div className="menu-root">
       <MenuBackground />
-      <div className="menu-panel">
-        <div className="title-kicker">TACTICAL OPERATIONS UNIT</div>
-        <h1 className="game-title">
-          OPERATION
-          <br />
-          SHADOWLINE
-        </h1>
-        <div className="game-subtitle">Three operations. One shadow.</div>
-        <nav className="menu-buttons">
-          <button
-            className="menu-btn primary"
-            onClick={click(() => startMission('desert', MISSIONS.desert))}
-          >
-            PLAY
-          </button>
-          <button className="menu-btn" onClick={click(() => setScreen('missions'))}>
-            SELECT MISSION
-          </button>
-          <button className="menu-btn" onClick={click(() => setScreen('controls'))}>
-            CONTROLS
-          </button>
-          <button className="menu-btn" onClick={click(() => setScreen('settings'))}>
-            SETTINGS
-          </button>
-        </nav>
-        <div className="menu-footer">
-          Original game — all assets, audio and code generated in-engine. No third-party IP.
+      <div className="menu-layout">
+        <div className="menu-panel">
+          <div className="title-kicker">TACTICAL OPERATIONS UNIT</div>
+          <h1 className="game-title">
+            OPERATION
+            <br />
+            SHADOWLINE
+          </h1>
+          <div className="game-subtitle">Three operations. One shadow.</div>
+          <nav className="menu-buttons">
+            <button className="menu-btn primary" onClick={click(() => requestDeploy('desert'))}>
+              PLAY
+            </button>
+            <button className="menu-btn" onClick={click(() => setScreen('missions'))}>
+              SELECT MISSION
+            </button>
+            <button className="menu-btn" onClick={click(() => setScreen('controls'))}>
+              CONTROLS
+            </button>
+            <button className="menu-btn" onClick={click(() => setScreen('settings'))}>
+              SETTINGS
+            </button>
+          </nav>
+          <div className="menu-footer">
+            Original game — all assets, audio and code generated in-engine. No third-party IP.
+          </div>
         </div>
+        <Leaderboard />
       </div>
-      <div className="version-tag">v0.1 PHASE A</div>
+      <div className="version-tag">v0.2</div>
       <div className="scanlines" />
       <div className="vignette" />
     </div>

@@ -9,7 +9,7 @@ const DIFFICULTY_COLORS = {
 }
 
 export default function MissionSelect() {
-  const startMission = useGame((s) => s.startMission)
+  const requestDeploy = useGame((s) => s.requestDeploy)
   const setScreen = useGame((s) => s.setScreen)
 
   const deploy = (id) => {
@@ -17,7 +17,7 @@ export default function MissionSelect() {
       audio.init()
       audio.uiClick()
     } catch {}
-    startMission(id, MISSIONS[id]) // also sets screen to 'game'
+    requestDeploy(id) // asks for callsign first if none set, then starts the mission
   }
 
   const back = () => {

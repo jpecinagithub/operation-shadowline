@@ -6,6 +6,7 @@ import MissionSelect from './components/MissionSelect.jsx'
 import Controls from './components/Controls.jsx'
 import Settings from './components/Settings.jsx'
 import Game from './components/Game.jsx'
+import NameModal from './components/NameModal.jsx'
 
 // Screen router. First user click anywhere initializes the Web Audio context
 // (browsers require a user gesture before AudioContext can start).
@@ -25,17 +26,28 @@ export default function App() {
     return () => document.removeEventListener('click', onFirstGesture)
   }, [])
 
+  let view
   switch (screen) {
     case 'missions':
-      return <MissionSelect />
+      view = <MissionSelect />
+      break
     case 'controls':
-      return <Controls />
+      view = <Controls />
+      break
     case 'settings':
-      return <Settings />
+      view = <Settings />
+      break
     case 'game':
-      return <Game />
+      view = <Game />
+      break
     case 'menu':
     default:
-      return <MainMenu />
+      view = <MainMenu />
   }
+  return (
+    <>
+      {view}
+      <NameModal />
+    </>
+  )
 }

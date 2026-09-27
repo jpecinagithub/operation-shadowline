@@ -67,6 +67,7 @@ export function CompleteScreen({ onRestartMission }) {
   const status = useGame((s) => s.status)
   const missionTime = useGame((s) => s.missionTime)
   const kills = useGame((s) => s.kills)
+  const lastScore = useGame((s) => s.lastScore)
   const quitToMenu = useGame((s) => s.quitToMenu)
 
   if (status !== 'complete') return null
@@ -92,7 +93,20 @@ export function CompleteScreen({ onRestartMission }) {
             <div className="stat-label">KILLS</div>
             <div className="stat-value">{kills}</div>
           </div>
+          {lastScore && (
+            <div className="stat">
+              <div className="stat-label">SCORE</div>
+              <div className="stat-value gold">{lastScore.score.toLocaleString('en-US')}</div>
+            </div>
+          )}
         </div>
+        {lastScore && lastScore.rank > 0 && (
+          <div className={`score-note ${lastScore.isRecord ? 'record' : ''}`}>
+            {lastScore.isRecord
+              ? '★ NEW RECORD — TOP OF THE LEADERBOARD'
+              : `RANKED #${lastScore.rank} ON THE LEADERBOARD`}
+          </div>
+        )}
         <nav className="overlay-buttons">
           <button className="pbtn primary" onClick={click(onRestartMission)}>
             REPLAY
